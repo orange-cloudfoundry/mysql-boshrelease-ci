@@ -1,0 +1,8 @@
+---
+bosh-deployment:
+  name: cf-mysql-concourse
+  release-name:  "cf-mysql-ci"
+  arbitrator :   true
+  syslog:        true
+  prometheus:    true
+  shield:        true

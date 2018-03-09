@@ -8,15 +8,15 @@ image_resource:
     tag: latest
 
 inputs:
-- name: cf-mysql-release
-- name: cf-mysql-deployment
-- name: mysql-boshrelease-ci
+  - name: cf-mysql-release
+  - name: cf-mysql-deployment
+  - name: mysql-boshrelease-ci
 
 outputs:
-- name: deployment-manifest
+  - name: deployment-manifest
 
 run:
-  path: mysql-boshrelease-ci/scripts/interpolate-manifest
+  path: mysql-boshrelease-ci/scripts/interpolate-manifest.sh
 
 params:
   OUTPUT_FILE: deployment-manifest/deployment.yml

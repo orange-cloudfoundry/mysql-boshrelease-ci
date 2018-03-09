@@ -1,0 +1,20 @@
+---
+# Maximum total number of database connections for the node
+- type: replace
+  path: /instance_groups/name=mysql/jobs/name=mysql/properties/cf_mysql/mysql/max_connections?
+  value: 150
+
+# Threshold in seconds above which SQL queries get logged in the slow query log file
+- type: replace
+  path: /instance_groups/name=mysql/jobs/name=mysql/properties/cf_mysql/mysql/long_query_time?
+  value: 1
+
+# When disable_auto_sst is true, nodes unable to IST will be prevented from automatically deleting their data and performing an SST
+- type: replace
+  path: /instance_groups/name=mysql/jobs/name=mysql/properties/cf_mysql/mysql/disable_auto_sst?
+  value: true
+
+# Enable audit logging and specify types of events that will be logged. If null, then logging is disabled
+- type: replace
+  path: /instance_groups/name=mysql/jobs/name=mysql/properties/cf_mysql/mysql/server_audit_events?
+  value: "connect,query,table,query_ddl,query_dml,query_dcl"

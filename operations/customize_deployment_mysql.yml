@@ -1,0 +1,73 @@
+---
+- path: /name
+  type: replace
+  value: "cf-mysql-concourse"
+
+- type: replace
+  path: /stemcells/alias=default
+  value:
+    alias: default
+    os: ubuntu-trusty
+    version: latest
+
+### vm mysql
+- path: /instance_groups/name=mysql/networks
+  type: replace
+  value: [{name: mysql-net}]
+
+- path: /instance_groups/name=mysql/azs
+  type: replace
+  value: [z1]
+
+- path: /instance_groups/name=mysql/vm_type
+  type: replace
+  value: "small"
+
+### vm proxy
+- path: /instance_groups/name=proxy/networks
+  type: replace
+  value: [{name: mysql-net}]
+
+- path: /instance_groups/name=proxy/azs
+  type: replace
+  value: [z1]
+
+- path: /instance_groups/name=proxy/vm_type
+  type: replace
+  value: "small"  
+
+### errand
+- path: /instance_groups/name=bootstrap-vm/networks
+  type: replace
+  value: [{name: mysql-net}]
+
+- path: /instance_groups/name=bootstrap-vm/vm_type
+  type: replace
+  value: "small"    
+
+
+- path: /instance_groups/name=rejoin-unsafe-vm/networks
+  type: replace
+  value: [{name: mysql-net}]
+
+- path: /instance_groups/name=rejoin-unsafe-vm/vm_type
+  type: replace
+  value: "small"    
+
+
+- path: /instance_groups/name=verify-cluster-schemas-vm/networks
+  type: replace
+  value: [{name: mysql-net}]
+
+- path: /instance_groups/name=verify-cluster-schemas-vm/vm_type
+  type: replace
+  value: "small"    
+
+  
+- path: /instance_groups/name=smoke-tests-vm/networks
+  type: replace
+  value: [{name: mysql-net}]
+
+- path: /instance_groups/name=smoke-tests-vm/vm_type
+  type: replace
+  value: "small"    

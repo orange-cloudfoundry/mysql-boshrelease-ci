@@ -1,0 +1,15 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: ldangeardorange/bosh-cli-curl
+    tag: latest
+
+inputs:
+  - name: mysql-boshrelease-ci
+  - name: bosh-director-config
+
+run:
+  path: mysql-boshrelease-ci/scripts/tests/test-prometheus.sh

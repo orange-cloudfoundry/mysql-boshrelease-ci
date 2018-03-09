@@ -1,0 +1,49 @@
+---
+- type: replace
+  path: /releases/name=prometheus?
+  value:
+    name: prometheus
+    version: latest
+
+- type: replace
+  path: /instance_groups/name=mysql/jobs/name=mysqld_exporter?
+  value:
+    name: mysqld_exporter
+    release: prometheus
+    properties:
+      mysqld_exporter:
+        mysql:
+          address: localhost
+          username: roadmin
+          password: ((cf_mysql_mysql_roadmin_password))
+        collect:
+          binlog_size: true
+          engine_innodb_status: true
+          global_status: true
+          global_variables: true
+          info_schema:
+            innodb_metrics: true
+            processlist: true
+            query_response_time: false
+            tables: true
+            tablestats: true
+            userstats: true
+
+- type: replace
+  path: /instance_groups/name=mysql/jobs/name=mysql/properties/cf_mysql/mysql/remote_admin_access?
+  value: true
+  
+- type: replace
+  path: /instance_groups/name=mysql/jobs/name=mysql/properties/cf_mysql/mysql/roadmin_enabled?
+  value: true  
+
+- type: replace
+  path: /instance_groups/name=mysql/jobs/name=mysql/properties/cf_mysql/mysql/roadmin_password?
+  value: "((cf_mysql_mysql_roadmin_password))"
+
+- type: replace
+  path: /variables/name=cf_mysql_mysql_roadmin_password?
+  value:
+   name: cf_mysql_mysql_roadmin_password
+   type: password
+

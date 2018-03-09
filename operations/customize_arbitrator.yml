@@ -1,0 +1,13 @@
+### vm arbitrator
+- path: /instance_groups/name=arbitrator/networks
+  type: replace
+  value: [{name: mysql-net}]  
+
+- path: /instance_groups/name=arbitrator/azs
+  type: replace
+  value: [z1]
+
+- path: /instance_groups/name=arbitrator/vm_type
+  type: replace
+  value: "small"
+
