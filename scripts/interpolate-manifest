@@ -29,7 +29,7 @@ fi
 
 OUTPUT_FILE_DIR=$(dirname "${OUTPUT_FILE}")
 
-cd 
+cd $HOME
 
 bosh interpolate \
     ./cf-mysql-deployment/cf-mysql-deployment.yml \
