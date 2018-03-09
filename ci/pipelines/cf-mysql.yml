@@ -1,0 +1,45 @@
+---
+### RESOURCES TYPES
+
+resource_types:
+- name: bosh-deployment
+  type: docker-image
+  source:
+    repository: cloudfoundry/bosh-deployment-resource
+
+### RESOURCES
+resources:
+- name: cf-mysql-deployment
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/cf-mysql-deployment.git
+    branch: master
+
+- name: cf-mysql-release
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/cf-mysql-release.git
+    branch: master
+
+- name: mysql-boshrelease-ci
+  type: git
+  source:
+    uri: https://github.com/orange-cloudfoundry/mysql-boshrelease-ci.git
+    branch: master
+
+### JOBS
+jobs:
+- name: make-manifest
+  plan:
+    - aggregate:
+      - get: cf-mysql-release
+        trigger: true
+      - get: cf-mysql-deployment
+        trigger: true
+      - get: mysql-boshrelease-ci    
+        trigger: true    
+    - aggregate:
+      - task: interpolate-manifest
+        file: mysql-boshrelease-ci/ci/tasks/interpolate-manifest.yml
+        params:
+          ENABLE_REMOTE_ADMIN_ACCESS: true

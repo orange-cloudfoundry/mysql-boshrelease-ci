@@ -1,0 +1,54 @@
+---
+- path: /name
+  type: replace
+  value: "cf-mysql-concourse"
+
+- path: /instance_groups/name=mysql/networks
+  type: replace
+  value: [{name: mysql-net}]
+
+- path: /instance_groups/name=arbitrator/networks
+  type: replace
+  value: [{name: mysql-net}]  
+
+- path: /instance_groups/name=proxy/networks
+  type: replace
+  value: [{name: mysql-net}]
+
+- path: /instance_groups/name=bootstrap/networks
+  type: replace
+  value: [{name: mysql-net}]
+
+- path: /instance_groups/name=rejoin-unsafe/networks
+  type: replace
+  value: [{name: mysql-net}]
+
+- path: /instance_groups/name=verify-cluster-schemas/networks
+  type: replace
+  value: [{name: mysql-net}]
+  
+- path: /instance_groups/name=smoke-tests/networks
+  type: replace
+  value: [{name: mysql-net}]
+
+- path: /instance_groups/name=mysql/azs
+  type: replace
+  value: [z1]
+
+- path: /instance_groups/name=arbitrator/azs
+  type: replace
+  value: [z1]
+
+- path: /instance_groups/name=proxy/azs
+  type: replace
+  value: [z1]
+
+############### modification du parametrage MySQL
+- type: replace
+  path: /instance_groups/name=mysql/jobs/name=mysql/properties/cf_mysql/mysql/max_connections?
+  value: 150
+
+############### Activation de du pluggin audit_server
+- type: replace
+  path: /instance_groups/name=mysql/jobs/name=mysql/properties/cf_mysql/mysql/server_audit_events?
+  value: "connect,query,table,query_ddl,query_dml,query_dcl"
