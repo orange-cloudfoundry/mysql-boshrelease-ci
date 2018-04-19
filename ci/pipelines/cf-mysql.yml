@@ -46,7 +46,7 @@ resources:
   source:
     uri: ((elpaaso-gitlab.url))
     branch: master
-    skip_ssl_verification: true
+    #skip_ssl_verification: true
     #private_key:  ((elpaaso-gitlab.private-key))
     username:     ((elpaaso-gitlab.username))
     password:     ((elpaaso-gitlab.password))
