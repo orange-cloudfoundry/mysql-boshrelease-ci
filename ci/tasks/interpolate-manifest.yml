@@ -20,8 +20,9 @@ run:
 
 params:
   OUTPUT_FILE: deployment-manifest/deployment.yml
-  ENABLE_INTERRUPTOR: false
-  MINIMAL_MODE: false
-  NO_ARBITRATOR: false
-  ENABLE_REMOTE_ADMIN_ACCESS: false
-  SET_CF_MYSQL_HOST: false
+  DEPLOYMENT_NAME : ((bosh-deployment.name))
+  ARBITRATOR:       ((bosh-deployment.arbitrator))
+  SYSLOG:           ((bosh-deployment.syslog))
+  PROMETHEUS:       ((bosh-deployment.prometheus))
+  SHIELD:           ((bosh-deployment.shield))
+  TYPE_OS:         "ubuntu-trusty"

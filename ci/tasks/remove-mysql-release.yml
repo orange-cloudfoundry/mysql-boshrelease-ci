@@ -13,3 +13,7 @@ inputs:
 
 run:
   path: mysql-boshrelease-ci/scripts/remove-mysql-release.sh
+
+params:  
+  ALIAS:            ((bosh-server.alias)) 
+  DEPLOYMENT_NAME : ((bosh-deployment.name))     

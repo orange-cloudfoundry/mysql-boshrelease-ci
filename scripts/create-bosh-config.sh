@@ -1,9 +1,18 @@
 #!/usr/bin/env bash 
-set -e
+set -eu
 
 ################################################################
-# object : define bosh config for bosh-cli : bosh_config.yml
-#################################################################
+# object    : define bosh config for bosh-cli : bosh_config.yml
+################################################################
+# method    : bosh delete-deployment 
+#             bosh delete-disk
+################################################################
+# parameter : CA_CERT:  
+#             IP
+#             ALIAS
+#             USER
+#             PASSWORD
+################################################################
 
 #### environnement bosh
 mkdir -p bosh-director-config

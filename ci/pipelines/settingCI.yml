@@ -55,3 +55,11 @@ communication:
     host:   xxxxxxxxxxxxxxxxxx
     port:   "99" 
     to:     ["mail@mail.mail", "mail@mail.mail"]
+
+elpaaso-gitlab:
+  url:        https://xxxxxxxxxxxxxxxxxx.git
+  proxy_host: 99.99.99.99
+  proxy_port: 9999
+  username: aaaaaaaaa
+  password: aaaaaaaaa
+  branch:   aaaaaaaaaaaaaaaaaaaaaaaaaa 

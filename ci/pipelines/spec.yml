@@ -1,4 +1,5 @@
 ---
+### spec for tesyt cf-mysql release
 bosh-deployment:
   name: cf-mysql-concourse
   release-name:  "cf-mysql-ci"
@@ -6,3 +7,16 @@ bosh-deployment:
   syslog:        true
   prometheus:    true
   shield:        true
+
+### spec for test cf-mysql release
+template-deployment-coab:
+  name: cf-mysql-coab
+  name-release: cf-mysql
+  branch: feature-configurable-plan-prices
+  rep: coab-depls
+
+template-deployment-ops:
+  name: cf-mysql-ops
+  name-release: cloudfoundry-mysql
+  branch: feature-shared-mysql-upgrade-36-19-with-prices
+  rep: ops-depls

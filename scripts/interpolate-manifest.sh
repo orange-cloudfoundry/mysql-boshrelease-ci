@@ -2,9 +2,16 @@
 set -eu
 
 ################################################################
-# object : interpolate of cf-mysql
+# object    : interpolate of cf-mysql
 ################################################################
-# method : bosh interolate -d <deployment name>
+# method    : bosh interpolate -d <deployment name>
+################################################################
+# parameter : DEPLOYMENT_NAME 
+#             ARBITRATOR
+#             SYSLOG
+#             PROMETHEUS
+#             SHIELD
+#             TYPE_OS
 ################################################################
 
 #### Initialization
@@ -47,6 +54,7 @@ bosh -d ${DEPLOYMENT_NAME} interpolate \
     -o ./mysql-boshrelease-ci/operations/customize_deployment_mysql.yml \
     -o ./mysql-boshrelease-ci/operations/customize_mariadb.yml \
     -l ./cf-mysql-deployment/bosh-lite/default-vars.yml \
+    -v type_os=$TYPE_OS \
     --vars-store ./mysql-boshrelease-ci/operations/credentials.yml  \
         > ./manifest-with-variables.yml
 

@@ -1,5 +1,7 @@
 ---
-#################################################################### Ressource type 
+###################################################################
+######                   Ressources Type                      #####
+###################################################################
 resource_types:
 - name: keyval
   type: docker-image
@@ -16,13 +18,17 @@ resource_types:
   source:
     repository: jraverdyorange/concourse-director-release-check-resource    
 
-- name: git-jra
-  type: docker-image
-  source:
-    repository: jraverdyorange/git-resource
-
-################################################################### Ressource
+#- name: git-jra
+#  type: docker-image
+#  source:
+#    repository: jraverdyorange/git-resource
+#
+###################################################################
+######                        Ressources                      #####
+###################################################################
 resources:
+
+##### git
 - name: cf-mysql-deployment
   type: git
   source:
@@ -41,28 +47,32 @@ resources:
     uri: https://github.com/orange-cloudfoundry/mysql-boshrelease-ci.git
     branch: master
 
-- name: paas-templates
+- name: git-paas-templates-coab
   type: git
   source:
     uri: ((elpaaso-gitlab.url))
-    branch: master
-    #skip_ssl_verification: true
-    #private_key:  ((elpaaso-gitlab.private-key))
+    branch: ((template-deployment-coab.branch))
+    skip_ssl_verification: true
     username:     ((elpaaso-gitlab.username))
     password:     ((elpaaso-gitlab.password))
-    #https_tunnel:
-    #  proxy_port: ((elpaaso-gitlab.proxy_port))
-    #  proxy_host: ((elpaaso-gitlab.proxy_host))
-    #  proxy_user: ""
-    #  proxy_password: ""
 
+- name: git-paas-templates-ops
+  type: git
+  source:
+    uri: ((elpaaso-gitlab.url))
+    branch: ((template-deployment-ops.branch))
+    skip_ssl_verification: true
+    username:     ((elpaaso-gitlab.username))
+    password:     ((elpaaso-gitlab.password))    
 
+##### keyval
 - name: version-release-mysql
   type: keyval
 
 - name: bosh-version-ops
   type: keyval
 
+##### product-installed-version
 - name: prometheus-version
   type:  product-installed-version
   source:
@@ -79,6 +89,7 @@ resources:
     password: ((bosh-server.password)) 
     product:  "shield"
 
+##### mail
 - name: send-email
   type: email
   source:
@@ -90,9 +101,12 @@ resources:
     from: concourse@dbsp.dw
     to: ((communication.mail.to))
 
-
-################################################################### Jobs
+###################################################################
+#####                       jobs                              #####
+###################################################################
 jobs:
+
+##### job : check-version-mysql
 - name: check-version-mysql
   serial: true
   plan:
@@ -115,6 +129,7 @@ jobs:
     - put: version-release-mysql
       params: {file: version-release-mysql/keyval.properties}      
 
+##### job : check-version-ops
 - name: check-version-ops
   serial: true
   plan:
@@ -137,6 +152,7 @@ jobs:
     - put: bosh-version-ops
       params: {file: bosh-version-ops/keyval.properties}      
 
+##### job : make-manifest
 - name: make-manifest
   plan:
     - aggregate:
@@ -158,7 +174,9 @@ jobs:
         SYSLOG:           ((bosh-deployment.syslog))
         PROMETHEUS:       ((bosh-deployment.prometheus))
         SHIELD:           ((bosh-deployment.shield))
+        TYPE_OS:         "ubuntu-trusty"
 
+##### job : deploy-new-cf-mysql
 - name: deploy-new-cf-mysql
   serial: true
   plan:
@@ -199,6 +217,7 @@ jobs:
         SHIELD:           ((bosh-deployment.shield))
         RELEASE_NAME:     ((bosh-deployment.release-name))
         VERSION_RELEASE: "MASTER"
+        TYPE_OS:         "ubuntu-trusty"
 
     - task: test-mariadb
       file: mysql-boshrelease-ci/ci/tasks/tests/test-mariadb.yml
@@ -212,10 +231,11 @@ jobs:
         ALIAS:            ((bosh-server.alias))
         DEPLOYMENT_NAME : ((bosh-deployment.name))
 
-- name: deploy-upgrade-cf-mysql
+##### job : deploy-new-cf-mysql-xenial
+- name: deploy-new-cf-mysql-xenial
   serial: true
   plan:
-    - aggregate:
+    - aggregate: 
       - get: cf-mysql-release
       - get: cf-mysql-deployment
       - get: mysql-boshrelease-ci   
@@ -225,7 +245,62 @@ jobs:
       - get: bosh-version-ops
         trigger: true
         passed: [deploy-new-cf-mysql] 
+    
+    - task: create-bosh-config
+      file: mysql-boshrelease-ci/ci/tasks/create-bosh-config.yml
+      params: 
+        CA_CERT:  ((bosh-server.ca))
+        IP:       ((bosh-server.ip))
+        ALIAS:    ((bosh-server.alias)) 
+        USER:     ((bosh-server.user))
+        PASSWORD: ((bosh-server.password))
 
+    - task: remove-mysql-release
+      file: mysql-boshrelease-ci/ci/tasks/remove-mysql-release.yml
+      params:
+        ALIAS:            ((bosh-server.alias))
+        DEPLOYMENT_NAME : ((bosh-deployment.name))     
+
+    - task: deploy-new-mysql-release
+      file: mysql-boshrelease-ci/ci/tasks/deploy-mysql-release.yml
+      params:
+        ALIAS:            ((bosh-server.alias))
+        DEPLOYMENT_NAME : ((bosh-deployment.name))
+        ARBITRATOR:       ((bosh-deployment.arbitrator))
+        SYSLOG:           ((bosh-deployment.syslog))
+        PROMETHEUS:       ((bosh-deployment.prometheus))
+        SHIELD:           ((bosh-deployment.shield))
+        RELEASE_NAME:     ((bosh-deployment.release-name))
+        VERSION_RELEASE: "MASTER"
+        TYPE_OS:         "ubuntu-xenial"
+
+    - task: test-mariadb
+      file: mysql-boshrelease-ci/ci/tasks/tests/test-mariadb.yml
+      params:
+        ALIAS:            ((bosh-server.alias))
+        DEPLOYMENT_NAME : ((bosh-deployment.name))
+
+    - task: test-prometheus
+      file: mysql-boshrelease-ci/ci/tasks/tests/test-prometheus.yml
+      params:
+        ALIAS:            ((bosh-server.alias))
+        DEPLOYMENT_NAME : ((bosh-deployment.name))
+
+
+##### job : deploy-upgrade-cf-mysql
+- name: deploy-upgrade-cf-mysql
+  serial: true
+  plan:
+    - aggregate:
+      - get: cf-mysql-release
+      - get: cf-mysql-deployment
+      - get: mysql-boshrelease-ci   
+      - get: version-release-mysql
+        trigger: true
+        passed: [deploy-new-cf-mysql-xenial]
+      - get: bosh-version-ops
+        trigger: true
+        passed: [deploy-new-cf-mysql-xenial] 
     
     - task: create-bosh-config
       file: mysql-boshrelease-ci/ci/tasks/create-bosh-config.yml
@@ -253,6 +328,7 @@ jobs:
         SHIELD:           ((bosh-deployment.shield))
         RELEASE_NAME:     ((bosh-deployment.release-name))
         VERSION_RELEASE: "PREVIOUS"     
+        TYPE_OS:         "ubuntu-trusty"
 
     - task: deploy-upgrade-mysql-release
       file: mysql-boshrelease-ci/ci/tasks/deploy-mysql-release.yml
@@ -265,6 +341,7 @@ jobs:
         SHIELD:           ((bosh-deployment.shield))
         RELEASE_NAME:     ((bosh-deployment.release-name))
         VERSION_RELEASE: "MASTER"      
+        TYPE_OS:         "ubuntu-trusty"
 
     - task: test-mariadb
       file: mysql-boshrelease-ci/ci/tasks/tests/test-mariadb.yml
@@ -278,20 +355,63 @@ jobs:
         ALIAS:            ((bosh-server.alias))
         DEPLOYMENT_NAME : ((bosh-deployment.name))
 
-- name: deploy-cf-mysql-with-template
+    - task: remove-mysql-release
+      file: mysql-boshrelease-ci/ci/tasks/remove-mysql-release.yml
+      params:
+        ALIAS:            ((bosh-server.alias))
+        DEPLOYMENT_NAME : ((bosh-deployment.name))     
+
+##### job : interpolate-manifest-template-coab
+- name: interpolate-manifest-template-coab
   serial: true
   plan:
     - aggregate:
       - get: cf-mysql-release
       - get: cf-mysql-deployment
       - get: mysql-boshrelease-ci   
-      - get: paas-templates
+      - get: git-paas-templates-coab
+        params: {submodules: none}
+        trigger: true
       - get: version-release-mysql
         trigger: true
-        passed: [deploy-upgrade-cf-mysql]
+        passed: [check-version-mysql]
       - get: bosh-version-ops
         trigger: true
-        passed: [deploy-upgrade-cf-mysql] 
+        passed: [check-version-ops] 
+    
+    - task: create-bosh-config
+      file: mysql-boshrelease-ci/ci/tasks/create-bosh-config.yml
+      params: 
+        CA_CERT:  ((bosh-server.ca))
+        IP:       ((bosh-server.ip))
+        ALIAS:    ((bosh-server.alias)) 
+        USER:     ((bosh-server.user))
+        PASSWORD: ((bosh-server.password))     
+
+    - task: interpolate-manifest-paas-templates-coab
+      file: mysql-boshrelease-ci/ci/tasks/interpolate-manifest-paas-templates-coab.yml
+      params:
+        DEPLOYMENT_NAME:       ((template-deployment-coab.name)) 
+        NAME_TEMPLATE_RELEASE: ((template-deployment-coab.name-release)) 
+        REP_TEMPLATE:          ((template-deployment-coab.rep)) 
+
+##### job : interpolate-manifest-template-ops
+- name: interpolate-manifest-template-ops
+  serial: true
+  plan:
+    - aggregate:
+      - get: cf-mysql-release
+      - get: cf-mysql-deployment
+      - get: mysql-boshrelease-ci   
+      - get: git-paas-templates-ops
+        params: {submodules: none}
+        trigger: true
+      - get: version-release-mysql
+        trigger: true
+        passed: [check-version-mysql]
+      - get: bosh-version-ops
+        trigger: true
+        passed: [check-version-ops] 
     
     - task: create-bosh-config
       file: mysql-boshrelease-ci/ci/tasks/create-bosh-config.yml
@@ -306,4 +426,11 @@ jobs:
       file: mysql-boshrelease-ci/ci/tasks/remove-mysql-release.yml
       params:
         ALIAS:            ((bosh-server.alias))
-        DEPLOYMENT_NAME : ((bosh-deployment.name))   
+        DEPLOYMENT_NAME:  ((template-deployment-ops.name))   
+
+    - task: interpolate-manifest-paas-templates-ops
+      file: mysql-boshrelease-ci/ci/tasks/interpolate-manifest-paas-templates-ops.yml
+      params:
+        DEPLOYMENT_NAME:       ((template-deployment-ops.name)) 
+        NAME_TEMPLATE_RELEASE: ((template-deployment-ops.name-release)) 
+        REP_TEMPLATE:          ((template-deployment-ops.rep))         

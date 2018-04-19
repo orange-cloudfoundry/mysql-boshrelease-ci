@@ -3,6 +3,7 @@
   path: /releases/name=prometheus?
   value:
     name: prometheus
+    #version: 21.1.1
     version: latest
 
 - type: replace

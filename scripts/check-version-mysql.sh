@@ -1,5 +1,5 @@
 #!/usr/bin/env bash 
-set -e
+set -eu
 
 ################################################################
 # object : Identify cf-mysql-release version
@@ -9,12 +9,18 @@ set -e
 
 #### Initialization
 
-### Master
+### Master cf-mysql
 pushd cf-mysql-release
 VERSION=$(git tag | xargs -I@ git log --format=format:"%ai @%n" -1 @ | sort | awk '{print $4}' | tail -1)
 
+### Master cf-mysql-deployment
+popd
+pushd cf-mysql-deployment 
+VERSIONDEPL=$(git tag | xargs -I@ git log --format=format:"%ai @%n" -1 @ | sort | awk '{print $4}' | tail -1)
+
+
 ### result
-if [ $? = 0 ]
+if [ ${VERSIONDEPL} == ${VERSION} ]
 then 
   ### body of mail
   popd
@@ -29,6 +35,9 @@ then
   echo "----------------------------------------------------------------------------------"
 else
   echo "##################################################################################"
-  echo "### Error to identify cf-mysql-release version"
+  echo "### Error : "
+  echo "###  . cf-mysql : ${VERSION} "
+  echo "###  . cf-mysql-deployment : ${VERSIONDEPL} "
   echo "##################################################################################"
+  exit 666
 fi

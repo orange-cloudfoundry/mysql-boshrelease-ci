@@ -15,3 +15,10 @@ outputs:
 
 run:
   path: mysql-boshrelease-ci/scripts/create-bosh-config.sh
+
+params:  
+  CA_CERT:  ((bosh-server.ca))
+  IP:       ((bosh-server.ip))
+  ALIAS:    ((bosh-server.alias)) 
+  USER:     ((bosh-server.user))
+  PASSWORD: ((bosh-server.password))    

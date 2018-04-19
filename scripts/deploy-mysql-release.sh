@@ -1,5 +1,5 @@
 #!/usr/bin/env bash 
-set -e
+set -eu
 
 ################################################################
 # object : deploy of cf-mysql
@@ -138,6 +138,7 @@ bosh -e ${ALIAS} -n -d ${DEPLOYMENT_NAME} deploy \
     -o ./mysql-boshrelease-ci/operations/customize_deployment_mysql.yml \
     -o ./mysql-boshrelease-ci/operations/customize_mariadb.yml \
     -l ./cf-mysql-deployment/bosh-lite/default-vars.yml \
+    -v type_os=$TYPE_OS \
     --vars-store ./mysql-boshrelease-ci/operations/credentials.yml 
 
 if [ $? = 0 ]

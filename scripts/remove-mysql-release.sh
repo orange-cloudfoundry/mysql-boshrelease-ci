@@ -1,15 +1,17 @@
 #!/usr/bin/env bash 
-set -e
+set -eu
 
 ################################################################
-# object : remove deployment
+# object    : remove deployment
 ################################################################
-# method : bosh delete-deployment 
-#          bosh delete-disk
+# method    : bosh delete-deployment 
+#             bosh delete-disk
+################################################################
+# parameter : ALIAS
+#             DEPLOYMENT_NAME
 ################################################################
 
 #### Initialization
-#export ROOT_FOLDER=${PWD}
 export BOSH_CONFIG=$PWD/bosh-director-config/bosh_config.yml
 
 ##############################################################################################
